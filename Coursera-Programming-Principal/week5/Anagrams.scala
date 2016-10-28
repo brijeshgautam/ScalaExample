@@ -121,8 +121,22 @@ object Anagrams {
    *  Note: the resulting value is an occurrence - meaning it is sorted
    *  and has no zero-entries.
    */
-  def subtract(x: Occurrences, y: Occurrences): Occurrences = for ( temp <-  y ; inner <-  x ; out =if (temp._1 != inner._1) inner else (inner._1,inner._2 -temp._2) ; if out._2 != 0) yield out
+  def subtract(x: Occurrences, y: Occurrences): Occurrences = {
+    def subtractHelper(x:Map[Char,Int], y:Occurrences):Map[Char,Int] = y match{
+      case Nil => x
+      case chr::_ => {
+        val data = x(y.head._1) - y.head._2
+        if ( data == 0 ) subtractHelper(x - y.head._1, y.tail)
+        else  subtractHelper(x + (y.head._1 -> data), y.tail)
+      }
 
+    }
+    val xmap = x.toMap
+    val ymap = y.toMap
+
+    subtractHelper(xmap, y).toList.sortBy(x => x._1)
+
+  }
   /** Returns a list of all anagram sentences of the given sentence.
    *
    *  An anagram of a sentence is formed by taking the occurrences of all the characters of
@@ -163,7 +177,8 @@ object Anagrams {
    *
    *  Note: There is only one anagram of an empty sentence.
    */
-  def subSentence(occ: Occurrences): List[Sentence] = {
+  def sentenceAnagrams(sentence: Sentence): List[Sentence] ={
+    def subSentence(occ: Occurrences): List[Sentence] = {
       if (occ.isEmpty) List(List())
       else
         for {
@@ -174,4 +189,18 @@ object Anagrams {
     }
 
     subSentence(sentenceOccurrences(sentence))
+  }
+
+
+  def main(args :Array[String]): Unit ={
+    val sentence = List("I", "love", "you")
+    val anas = List(
+      List("You", "olive"),
+      List("olive", "you")
+
+    )
+val ret =sentenceAnagrams(sentence).toSet
+    println(ret)
+
+  }
 }
