@@ -178,17 +178,24 @@ object Anagrams {
    *  Note: There is only one anagram of an empty sentence.
    */
   def sentenceAnagrams(sentence: Sentence): List[Sentence] ={
+    val occMap = new scala.collection.mutable.HashMap[Occurrences,List[Sentence]]()
+
     def subSentence(occ: Occurrences): List[Sentence] = {
       if (occ.isEmpty) List(List())
-      else
-        for {
+      else if (occMap.contains(occ))occMap(occ)
+      else {
+        val retVal = for {
           x <- combinations(occ)
           y <- dictionaryByOccurrences.getOrElse(x, List())
           z <- subSentence(subtract(occ, x))
         } yield y :: z
+        occMap += (occ -> retVal)
+        retVal
+      }
     }
 
-    subSentence(sentenceOccurrences(sentence))
+   subSentence(sentenceOccurrences(sentence))
+
   }
 
 
